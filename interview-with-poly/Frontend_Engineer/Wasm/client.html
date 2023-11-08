@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<script src="script.js"></script>
+<body>
+    <h1>WebAssembly Adder</h1>
+    <p>Enter two numbers, then choose whether you want to run the addition locally or via the server!</p>
+    <label for="num1">Number 1:</label>
+    <input type="number" id="num1" placeholder="Enter a number">
+    <br>
+    <label for="num2">Number 2:</label>
+    <input type="number" id="num2" placeholder="Enter a number">
+    <br>
+    <button id="calculateServer">Calculate Server</button>
+    <button id="calculateLocal">Calculate Locally</button>
+    <br>
+    <p id="result"></p>
+
+    <script>
+        const calculateServerButton = document.getElementById('calculateServer');
+        const calculateLocalButton = document.getElementById('calculateLocal');
+        const num1Input = document.getElementById('num1');
+        const num2Input = document.getElementById('num2');
+        const resultOutput = document.getElementById('result');
+
+        calculateLocalButton.addEventListener('click', () => {
+            const num1 = parseFloat(num1Input.value);
+            const num2 = parseFloat(num2Input.value);
+            
+            //check if two numbers are given
+            if (isNaN(num1) || isNaN(num2)) {
+                resultOutput.textContent = 'Please enter valid numbers.';
+            } else {
+                // Call the add function locally from the add.wasm file
+                const result = wasmExports.add(num1, num2);
+                resultOutput.textContent = 'This is the response from the client: The sum of ' + num1 + ' and ' + num2 + ' is ' + result;
+            }
+        });
+
+        calculateServerButton.addEventListener('click', () => {
+            const num1 = parseFloat(num1Input.value);
+            const num2 = parseFloat(num2Input.value);
+            
+            //Check if two numbers are given
+            if (isNaN(num1) || isNaN(num2)) {
+                resultOutput.textContent = 'Please enter valid numbers.';
+            } else {
+                // Make a request to the server and output the result, log errors if any
+                fetch(`http://localhost:3000/?a=${num1}&b=${num2}`)
+                    .then(response => response.text())
+                    .then(data => {
+                        resultOutput.textContent = data;
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        resultOutput.textContent = 'An error occurred.';
+                    });
+            }
+        });
+
+    </script>
+</body>
+</html>
